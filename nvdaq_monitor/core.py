@@ -110,7 +110,7 @@ class manager:
 
     def show_areas(self):
 
-        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10))
+        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
         for i in range(4):
             for j in range(4):
                 channel = i*4 + j
@@ -128,7 +128,7 @@ class manager:
 
     def show_baselines(self):
 
-        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10))
+        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
         for i in range(4):
             for j in range(4):
                 channel = i*4 + j
@@ -146,7 +146,7 @@ class manager:
 
     def show_timings(self):
 
-        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10))
+        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
         for i in range(4):
             for j in range(4):
                 channel = i*4 + j
