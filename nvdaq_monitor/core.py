@@ -47,11 +47,15 @@ class manager:
         self.init_bin_baseline = 10
         self.num_of_channel = 16
 
+
         self.calced_baselines = [[] for i in range(self.num_of_channel)]
         self.calced_areas = [[] for i in range(self.num_of_channel)]
         self.timestamps= [[] for i in range(self.num_of_channel)]
         self.peak_timings = [[] for i in range(self.num_of_channel)]
         self.waveforms= [[] for i in range(self.num_of_channel)]
+        self.diff_previous_times = [[] for i in range(self.num_of_channel)]
+
+        previous_timestamps = [None for i in range(self.num_of_channel)]
 
         #print('Total events: ', len(self.darr))
         self.init_timestamp = None
@@ -66,7 +70,7 @@ class manager:
             if self.init_timestamp is None:
                 self.init_timestamp = record['time']
 
-            if not event:
+            if not event:  # First record in the event
                 event_timestamp = record['time']
 
             event.append(record['data'])
@@ -87,16 +91,22 @@ class manager:
                 self.calced_areas[record['channel']].append(calced_area)
                 self.peak_timings[record['channel']].append(np.argmin(merged_event))
 
+                if previous_timestamps[record['channel']] is not None:
+                    diff_previous_time = event_timestamp - previous_timestamps[record['channel']]
+                    self.diff_previous_times[record['channel']].append(diff_previous_time)
+                    previous_timestamps[record['channel']] = event_timestamp
+
+                else:
+                    # First event
+                    previous_timestamps[record['channel']] = event_timestamp
 
 
                 self.final_timestamp = record['time']
                 event = []
 
-                i_loop += 1
-                if False & i_loop > 10:
-                    break
 
         return True
+
 
     def show_rates(self):
         event_numbers = [len(area) for area in self.calced_areas]  ## Event numbers
@@ -166,6 +176,23 @@ class manager:
                 axs1[i,j].set_xlabel('Peak timing (index)')
                 axs1[i,j].set_ylabel('Counts')
 
+
+    def show_diff_time(self, channel=0):
+        plt.hist(self.diff_previous_times[channel], lw=0, bins=100)
+        plt.xlabel('Time from previous event (ns)')
+        plt.ylabel('Counts')
+
+
+    def show_diff_times(self):
+
+        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
+        for i in range(4):
+            for j in range(4):
+                channel = i*4 + j
+                axs1[i,j].hist(self.diff_previous_times[channel], lw=0, bins=100, label='ch.'+str(channel), range=(0, 100000))
+                axs1[i,j].legend()
+                axs1[i,j].set_xlabel('Time from previous event (ns)')
+                axs1[i,j].set_ylabel('Counts')
 
 
 if __name__ == '__main__':
