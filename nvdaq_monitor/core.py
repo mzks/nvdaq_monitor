@@ -3,6 +3,7 @@ import pkg_resources
 import logging
 import numpy as np
 from tqdm import tqdm
+import glob
 import strax
 import blosc
 import matplotlib.pyplot as plt
@@ -23,8 +24,18 @@ class manager:
         self.data_name = self.__data_path + 'xenondaq_reader_0_140443912218368' # for test
 
 
+    def find_latest_file(self, dir_name=None):
+        if dir_name == None:
+            dir_name = self.__data_path
+
+        list_of_files = glob.glob(dir_name+'*')
+        latest_file = max(list_of_files, key=os.path.getctime)
+        self.data_name = latest_file
+
+
     def load_data(self):
 
+        print('Target file: ', self.data_name)
         self.file = open(self.data_name, 'rb')
         self.data = blosc.decompress(self.file.read())
         self.darr = np.frombuffer(self.data, dtype=strax.record_dtype())
@@ -166,3 +177,4 @@ if __name__ == '__main__':
     man.load_data()
     man.process()
     man.show_rates()
+    man.show_timings()
