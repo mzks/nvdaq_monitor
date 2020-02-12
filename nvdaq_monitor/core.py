@@ -64,6 +64,7 @@ class manager:
 
     def process(self):
 
+        # Prepare
         self.init_bin_baseline = 10
         self.num_of_channel = 16
 
@@ -72,31 +73,24 @@ class manager:
         self.timestamps= [[] for i in range(self.num_of_channel)]
         self.peak_timings = [[] for i in range(self.num_of_channel)]
         self.waveforms= [[] for i in range(self.num_of_channel)]
-        self.diff_previous_times = [[] for i in range(self.num_of_channel)]
 
-
-
+        # Loop
         for data_name in tqdm(self.data_name_list):
-
             if not self.load_data(data_name): continue
-
-            previous_timestamps = [None for i in range(self.num_of_channel)]
             event = []
 
             for record in self.darr:
-
                 if not event:  # First record in the event
                     event_timestamp = record['time']
-
                 event.append(record['data'])
 
                 if self.count_record(event)<record['pulse_length']:
                     #print('len', count_record(event), 'pulse-l', record['pulse_length'])
                     continue
+
                 else:
                     # End of Event
                     merged_event = np.array([item for sublist in event for item in sublist])[0:record['pulse_length']]
-
                     calced_baseline = merged_event[0:self.init_bin_baseline].sum()/self.init_bin_baseline
                     calced_area = (calced_baseline-merged_event).sum()
 
@@ -106,17 +100,7 @@ class manager:
                     self.calced_areas[record['channel']].append(calced_area)
                     self.peak_timings[record['channel']].append(np.argmin(merged_event))
 
-                    if previous_timestamps[record['channel']] is not None:
-                        diff_previous_time = event_timestamp - previous_timestamps[record['channel']]
-                        self.diff_previous_times[record['channel']].append(diff_previous_time)
-                        previous_timestamps[record['channel']] = event_timestamp
-
-                    else:
-                        # First event
-                        previous_timestamps[record['channel']] = event_timestamp
-
                     event = []
-
         return True
 
 
