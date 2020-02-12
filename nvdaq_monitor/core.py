@@ -20,33 +20,52 @@ class manager:
         self.logger.info('Monitor ver. 0.1.0 Trial 1')
 
         # Parameters
-        self.__data_path = pkg_resources.resource_filename('nvdaq_monitor', 'data/')
-        self.data_name = self.__data_path + 'xenondaq_reader_0_140443912218368' # for test
+        # self.__data_path = pkg_resources.resource_filename('nvdaq_monitor', 'data/')
+        # self.data_name = self.__data_path + 'xenondaq_reader_0_140443912218368' # for test
+        self.data_name_list = []
 
 
-    def find_latest_file(self, dir_name=None):
-        if dir_name == None:
-            dir_name = self.__data_path
+    #def find_latest_file(self, dir_name=None):
+    #    if dir_name == None:
+    #        dir_name = self.__data_path
 
-        list_of_files = glob.glob(dir_name+'*')
-        latest_file = max(list_of_files, key=os.path.getctime)
-        self.data_name = latest_file
+    #    list_of_files = glob.glob(dir_name+'*')
+    #    latest_file = max(list_of_files, key=os.path.getctime)
+    #    self.data_name = latest_file
+
+    def add_subrun_file(self, file_path):
+
+        self.data_name_list.append(file_path)
 
 
-    def load_data(self):
+    def add_subrun_files(self, subrun_path='/Users/mzks/xenon/daq_test/data/TEST000003_02102020122501/000000/'):
 
-        print('Target file: ', self.data_name)
-        self.file = open(self.data_name, 'rb')
-        self.data = blosc.decompress(self.file.read())
-        self.darr = np.frombuffer(self.data, dtype=strax.record_dtype())
+        file_list = glob.glob(subrun_path + '*')
+        self.data_name_list.extend([file for file in file_list if os.stat(file).st_size != 0])
+
+
+
+    def load_data(self, data_name):
+
+        #print('Target file: ', data_name)
+        try:
+            self.file = open(data_name, 'rb')
+            self.data = blosc.decompress(self.file.read())
+            self.darr = np.frombuffer(self.data, dtype=strax.record_dtype())
+        except:
+            self.logger.warning('Skipped '+ data_name)
+            return False
+
+        return True
+
+    def count_record(self, event):
+        return sum([len(event) for event in event])
 
 
     def process(self):
 
-
         self.init_bin_baseline = 10
         self.num_of_channel = 16
-
 
         self.calced_baselines = [[] for i in range(self.num_of_channel)]
         self.calced_areas = [[] for i in range(self.num_of_channel)]
@@ -55,63 +74,60 @@ class manager:
         self.waveforms= [[] for i in range(self.num_of_channel)]
         self.diff_previous_times = [[] for i in range(self.num_of_channel)]
 
-        previous_timestamps = [None for i in range(self.num_of_channel)]
 
-        #print('Total events: ', len(self.darr))
-        self.init_timestamp = None
-        i_loop = 0
-        event = []
 
-        def count_record(event):
-            return sum([len(event) for event in event])
+        for data_name in tqdm(self.data_name_list):
 
-        for record in tqdm(self.darr):
+            if not self.load_data(data_name): continue
 
-            if self.init_timestamp is None:
-                self.init_timestamp = record['time']
+            previous_timestamps = [None for i in range(self.num_of_channel)]
+            event = []
 
-            if not event:  # First record in the event
-                event_timestamp = record['time']
+            for record in self.darr:
 
-            event.append(record['data'])
+                if not event:  # First record in the event
+                    event_timestamp = record['time']
 
-            if count_record(event)<record['pulse_length']:
-                #print('len', count_record(event), 'pulse-l', record['pulse_length'])
-                continue
-            else:
-                # End of Event
-                merged_event = np.array([item for sublist in event for item in sublist])[0:record['pulse_length']]
+                event.append(record['data'])
 
-                calced_baseline = merged_event[0:self.init_bin_baseline].sum()/self.init_bin_baseline
-                calced_area = (calced_baseline-merged_event).sum()
-
-                self.waveforms[record['channel']].append(merged_event)
-                self.timestamps[record['channel']].append(event_timestamp)
-                self.calced_baselines[record['channel']].append(calced_baseline)
-                self.calced_areas[record['channel']].append(calced_area)
-                self.peak_timings[record['channel']].append(np.argmin(merged_event))
-
-                if previous_timestamps[record['channel']] is not None:
-                    diff_previous_time = event_timestamp - previous_timestamps[record['channel']]
-                    self.diff_previous_times[record['channel']].append(diff_previous_time)
-                    previous_timestamps[record['channel']] = event_timestamp
-
+                if self.count_record(event)<record['pulse_length']:
+                    #print('len', count_record(event), 'pulse-l', record['pulse_length'])
+                    continue
                 else:
-                    # First event
-                    previous_timestamps[record['channel']] = event_timestamp
+                    # End of Event
+                    merged_event = np.array([item for sublist in event for item in sublist])[0:record['pulse_length']]
 
+                    calced_baseline = merged_event[0:self.init_bin_baseline].sum()/self.init_bin_baseline
+                    calced_area = (calced_baseline-merged_event).sum()
 
-                self.final_timestamp = record['time']
-                event = []
+                    self.waveforms[record['channel']].append(merged_event)
+                    self.timestamps[record['channel']].append(event_timestamp)
+                    self.calced_baselines[record['channel']].append(calced_baseline)
+                    self.calced_areas[record['channel']].append(calced_area)
+                    self.peak_timings[record['channel']].append(np.argmin(merged_event))
 
+                    if previous_timestamps[record['channel']] is not None:
+                        diff_previous_time = event_timestamp - previous_timestamps[record['channel']]
+                        self.diff_previous_times[record['channel']].append(diff_previous_time)
+                        previous_timestamps[record['channel']] = event_timestamp
+
+                    else:
+                        # First event
+                        previous_timestamps[record['channel']] = event_timestamp
+
+                    event = []
 
         return True
 
 
     def show_rates(self):
-        event_numbers = [len(area) for area in self.calced_areas]  ## Event numbers
-        livetime = (self.final_timestamp - self.init_timestamp) * 1.e-9
-        rates = event_numbers / livetime  # (Hz)
+
+        event_numbers = [len(time) for time in self.timestamps]  ## Event numbers
+        start_time = [(np.min(time) if (time != []) else None) for time in self.timestamps]
+        stop_time = [(np.max(time) if (time != []) else None) for time in self.timestamps]
+        live_time = [stop - start if (stop and start) else None for stop, start in zip(stop_time, start_time)]
+        rates = [event / live * 1.e9 if (event and live) else 0 for event, live in zip(event_numbers, live_time)]
+
         plt.bar(np.arange(0, self.num_of_channel), rates)
         plt.xlabel('Channel')
         plt.ylabel('Rate (Hz)')
@@ -201,6 +217,6 @@ if __name__ == '__main__':
 
     man = manager()
 
-    man.load_data()
+    man.add_subrun_files('/Users/mzks/xenon/daq_test/data/TEST000003_02102020122501/000000/')
     man.process()
     man.show_rates()
