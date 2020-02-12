@@ -38,7 +38,7 @@ class manager:
         self.data_name_list.append(file_path)
 
 
-    def add_subrun_files(self, subrun_path='/Users/mzks/xenon/daq_test/data/TEST000003_02102020122501/000000/'):
+    def add_subrun_files(self, subrun_path='/Users/mzks/xenon/daq_test/data/TEST000003_02102020122501/000023/'):
 
         file_list = glob.glob(subrun_path + '*')
         self.data_name_list.extend([file for file in file_list if os.stat(file).st_size != 0])
@@ -101,6 +101,7 @@ class manager:
                     self.peak_timings[record['channel']].append(np.argmin(merged_event))
 
                     event = []
+
         return True
 
 
@@ -178,21 +179,29 @@ class manager:
 
 
     def show_diff_time(self, channel=0, hist_range=None, bins=None):
-        plt.hist(self.diff_previous_times[channel], lw=0, range=hist_range, bins=bins)
+
+        sorted_timestamp = np.sort(self.timestamps[channel])
+        buf1 = np.diff(sorted_timestamp)
+        plt.hist(np.diff(sorted_timestamp), lw=0, range=hist_range, bins=bins)
         plt.xlabel('Time from previous event (ns)')
         plt.ylabel('Counts')
 
 
     def show_diff_times(self, hist_range=None, bins=None):
 
+        sorted_timestamps = [np.sort(timestamp) for timestamp in self.timestamps]
+
         fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
         for i in range(4):
             for j in range(4):
                 channel = i*4 + j
-                axs1[i, j].hist(self.diff_previous_times[channel], lw=0, label='ch.'+str(channel), range=hist_range, bins=bins)
+                axs1[i, j].hist(np.diff(sorted_timestamps[channel]), lw=0, label='ch.'+str(channel), range=hist_range, bins=bins)
                 axs1[i, j].legend()
                 axs1[i, j].set_xlabel('Time from previous event (ns)')
                 axs1[i, j].set_ylabel('Counts')
+
+    def show_timestamp(self, channel=0, hist_range=None, bins=None):
+        pass
 
 
 if __name__ == '__main__':
@@ -201,6 +210,7 @@ if __name__ == '__main__':
 
     man = manager()
 
-    man.add_subrun_files('/Users/mzks/xenon/daq_test/data/TEST000003_02102020122501/000000/')
+    man.add_subrun_files('/Users/mzks/xenon/daq_test/data/TEST000003_02102020122501/000023/')
     man.process()
     man.show_rates()
+    man.show_diff_time(0)
