@@ -190,7 +190,6 @@ class manager:
     def show_diff_times(self, hist_range=None, bins=None):
 
         sorted_timestamps = [np.sort(timestamp) for timestamp in self.timestamps]
-
         fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
         for i in range(4):
             for j in range(4):
@@ -200,8 +199,24 @@ class manager:
                 axs1[i, j].set_xlabel('Time from previous event (ns)')
                 axs1[i, j].set_ylabel('Counts')
 
-    def show_timestamp(self, channel=0, hist_range=None, bins=None):
-        pass
+
+    def show_timestamp(self, channel=0):
+        sorted_timestamp = np.sort(self.timestamps[channel])
+        plt.plot(sorted_timestamp)
+        plt.ylabel('Timestamp (ns)')
+        plt.xlabel('Events')
+
+
+    def show_timestamps(self):
+        sorted_timestamps = [np.sort(timestamp) for timestamp in self.timestamps]
+        fig1, axs1 = plt.subplots(4, 4, figsize=(16, 10), constrained_layout=True)
+        for i in range(4):
+            for j in range(4):
+                channel = i * 4 + j
+                axs1[i, j].plot(sorted_timestamps[channel], label='ch.' + str(channel))
+                axs1[i, j].legend()
+                axs1[i, j].set_ylabel('Timestamp (ns)')
+                axs1[i, j].set_xlabel('Events')
 
 
 if __name__ == '__main__':
