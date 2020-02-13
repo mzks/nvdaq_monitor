@@ -17,35 +17,31 @@ class manager:
     def __init__(self):
 
         self.logger = logging.getLogger(__name__)
-        self.logger.info('Monitor ver. 0.1.0 Trial 1')
+        self.logger.info('Monitor ver. 0.2.0 Trial 1')
 
-        # Parameters
-        # self.__data_path = pkg_resources.resource_filename('nvdaq_monitor', 'data/')
-        # self.data_name = self.__data_path + 'xenondaq_reader_0_140443912218368' # for test
         self.data_name_list = []
 
 
-    #def find_latest_file(self, dir_name=None):
-    #    if dir_name == None:
-    #        dir_name = self.__data_path
+    def find_latest_file(self, dir_name=None):
+        if dir_name == None:
+            dir_name = self.__data_path
 
-    #    list_of_files = glob.glob(dir_name+'*')
-    #    latest_file = max(list_of_files, key=os.path.getctime)
-    #    self.data_name = latest_file
+        list_of_files = glob.glob(dir_name+'*')
+        latest_file = max(list_of_files, key=os.path.getctime)
+        return latest_file
+
 
     def add_subrun_file(self, file_path):
-
         self.data_name_list.append(file_path)
 
 
-    def add_subrun_files(self, subrun_path='/Users/mzks/xenon/daq_test/data/TEST000003_02102020122501/000023/'):
+    def add_subrun_files(self, subrun_path):
 
         file_list = glob.glob(subrun_path + '*')
         self.data_name_list.extend([file for file in file_list if os.stat(file).st_size != 0])
 
 
-
-    def load_data(self, data_name):
+    def __load_data(self, data_name):
 
         #print('Target file: ', data_name)
         try:
@@ -58,7 +54,7 @@ class manager:
 
         return True
 
-    def count_record(self, event):
+    def __count_record(self, event):
         return sum([len(event) for event in event])
 
 
@@ -76,7 +72,7 @@ class manager:
 
         # Loop
         for data_name in tqdm(self.data_name_list):
-            if not self.load_data(data_name): continue
+            if not self.__load_data(data_name): continue
             event = []
 
             for record in self.darr:
@@ -84,8 +80,7 @@ class manager:
                     event_timestamp = record['time']
                 event.append(record['data'])
 
-                if self.count_record(event)<record['pulse_length']:
-                    #print('len', count_record(event), 'pulse-l', record['pulse_length'])
+                if self.__count_record(event)<record['pulse_length']:
                     continue
 
                 else:
@@ -217,6 +212,18 @@ class manager:
                 axs1[i, j].legend()
                 axs1[i, j].set_ylabel('Timestamp (ns)')
                 axs1[i, j].set_xlabel('Events')
+
+
+    def show_summary(self):
+
+        self.show_rates()
+        self.show_areas()
+        self.show_baselines()
+        self.show_timestamps()
+        self.show_diff_times()
+
+    def help(self):
+        print('Usage:')
 
 
 if __name__ == '__main__':
