@@ -17,7 +17,7 @@ class manager:
     def __init__(self):
 
         self.logger = logging.getLogger(__name__)
-        self.logger.info('Monitor ver. 0.3.0 Trial 1')
+        self.logger.info('nvdaq_monitor version 1.0')
 
         self.data_dir_name = '/Users/mzks/xenon/daq_test/data/redax-data/'
         self.data_name_list = []
