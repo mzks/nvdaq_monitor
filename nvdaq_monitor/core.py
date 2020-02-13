@@ -17,28 +17,48 @@ class manager:
     def __init__(self):
 
         self.logger = logging.getLogger(__name__)
-        self.logger.info('Monitor ver. 0.2.0 Trial 1')
+        self.logger.info('Monitor ver. 0.3.0 Trial 1')
 
+        self.data_dir_name = '/Users/mzks/xenon/daq_test/data/redax-data/'
         self.data_name_list = []
 
 
-    def find_latest_file(self, dir_name=None):
+    def find_latest_run(self, dir_name=None):
         if dir_name == None:
-            dir_name = self.__data_path
+            dir_name = self.data_dir_name
 
         list_of_files = glob.glob(dir_name+'*')
         latest_file = max(list_of_files, key=os.path.getctime)
-        return latest_file
+        print(latest_file)
+        self.run_dir_name = latest_file + '/'
 
 
-    def add_subrun_file(self, file_path):
-        self.data_name_list.append(file_path)
+    def add_all_subrun(self):
+
+        for i in range(0, 10000):
+            subrun_name = str(i).zfill(6)
+            if glob.glob(self.run_dir_name + subrun_name) == []:
+                continue
+            self.add_srun_files(self.run_dir_name + subrun_name + '/')
 
 
-    def add_subrun_files(self, subrun_path):
+    def add_subruns(self, subrun_list = (1,2,3)):
+
+        for i in subrun_list:
+            subrun_name = str(i).zfill(6)
+            if glob.glob(self.run_dir_name + subrun_name) == []:
+                continue
+            self.add_srun_files(self.run_dir_name + subrun_name + '/')
+
+
+    def add_srun_files(self, subrun_path):
 
         file_list = glob.glob(subrun_path + '*')
         self.data_name_list.extend([file for file in file_list if os.stat(file).st_size != 0])
+
+
+    def add_file(self, file_path):
+        self.data_name_list.append(file_path)
 
 
     def __load_data(self, data_name):
@@ -111,6 +131,15 @@ class manager:
         plt.bar(np.arange(0, self.num_of_channel), rates)
         plt.xlabel('Channel')
         plt.ylabel('Rate (Hz)')
+
+
+    def show_counts(self):
+
+        event_numbers = [len(time) for time in self.timestamps]  ## Event numbers
+
+        plt.bar(np.arange(0, self.num_of_channel), event_numbers)
+        plt.xlabel('Channel')
+        plt.ylabel('Counts')
 
 
     def show_pulse(self, channel=0, event=0):
@@ -225,14 +254,42 @@ class manager:
     def help(self):
         print('Usage:')
 
+        print('Step 1: Set target run')
+        print("`man.run_dir_name = '/path/to/TEST000001_xxxxxxxxxxx/'`")
+        print('Or, ')
+        print("`man.find_latest_run()`")
+        print('')
+
+        print('Step 2: Merge subrun files')
+        print("`man.add_all_subrun()`")
+        print('Or, ')
+        print("`man.add_subruns((0,1,2,3))`")
+        print('')
+
+        print('Step 3: Check and process')
+        print("`man.data_name_list`")
+        print("`man.process()`")
+        print('')
+
+        print('Step 4: Visualize')
+        print('You can use the following functions:')
+        print('show_counts(), show_rates(), show_pulse(), show_area(), show_areas()')
+        print('show_baseline(), show_baselines(), show_timing(), show_timings()')
+        print('show_diff_time(), show_diff_times(), show_timestamp(), show_timestamps()')
+        print('')
+
+
 
 if __name__ == '__main__':
 
     logging.basicConfig(level='DEBUG')
-
     man = manager()
 
-    man.add_subrun_files('/Users/mzks/xenon/daq_test/data/TEST000003_02102020122501/000023/')
+    man.help()
+
+    man.find_latest_run()
+    man.add_all_subrun()
+
     man.process()
     man.show_rates()
-    man.show_diff_time(0)
+
