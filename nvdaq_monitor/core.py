@@ -172,6 +172,23 @@ class manager:
         plt.ylabel('Counts')
 
 
+    def show_baselines_bar(self):
+
+        means = [np.mean(baseline) if (baseline != []) else 0 for baseline in self.calced_baselines]
+        stds = [np.std(baseline) if (baseline != []) else 0 for baseline in self.calced_baselines]
+        plt.bar(np.arange(0, self.num_of_channel), means, yerr=stds)
+        plt.xlabel('Channel')
+        plt.ylabel('Baseline ADC Value')
+
+
+    def show_baselines_rms_bar(self):
+
+        stds = [np.std(baseline) if (baseline != []) else 0 for baseline in self.calced_baselines]
+        plt.bar(np.arange(0, self.num_of_channel), stds)
+        plt.xlabel('Channel')
+        plt.ylabel('Baseline RMS ADC Value')
+
+
     def show_baselines(self, hist_range=None, bins=None):
 
         fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
@@ -274,8 +291,8 @@ class manager:
         print('Step 4: Visualize')
         print('You can use the following functions:')
         print('show_counts(), show_rates(), show_pulse(), show_area(), show_areas()')
-        print('show_baseline(), show_baselines(), show_timing(), show_timings()')
-        print('show_diff_time(), show_diff_times(), show_timestamp(), show_timestamps()')
+        print('show_baseline(), show_baselines(), show_baselines_bar(), show_baselines_rms_bar(),')
+        print(' show_timing(), show_timings()','show_diff_time(), show_diff_times(), show_timestamp(), show_timestamps()')
         print('')
 
 
