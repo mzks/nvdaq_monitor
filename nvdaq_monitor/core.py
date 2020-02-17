@@ -33,7 +33,20 @@ class manager:
         self.run_dir_name = latest_file + '/'
 
 
-    def add_all_subrun(self):
+    def select_run(self, run_index_number=None):
+
+        print('data_dir_name: ', self.data_dir_name)
+        list_of_files = np.sort(glob.glob(self.data_dir_name+'*'))
+        for i, file in enumerate(list_of_files):
+            print(i, '\t', os.path.split(file)[1])
+            if i % 5 == 4: print('-----------------------------------------')
+
+        if run_index_number != None:
+            self.run_dir_name = list_of_files[run_index_number] + '/'
+            print('Target: ', self.run_dir_name)
+
+
+    def add_all_subruns(self):
 
         for i in range(0, 10000):
             subrun_name = str(i).zfill(6)
@@ -59,6 +72,10 @@ class manager:
 
     def add_file(self, file_path):
         self.data_name_list.append(file_path)
+
+
+    def clear_all_subruns(self):
+        self.data_name_list = []
 
 
     def __load_data(self, data_name):
@@ -275,10 +292,14 @@ class manager:
         print("`man.run_dir_name = '/path/to/TEST000001_xxxxxxxxxxx/'`")
         print('Or, ')
         print("`man.find_latest_run()`")
+        print('Or, interactive select')
+        print("`man.select_run()`")
+        print('then, select the index from list')
+        print("`man.select_run(5)`")
         print('')
 
         print('Step 2: Merge subrun files')
-        print("`man.add_all_subrun()`")
+        print("`man.add_all_subruns()`")
         print('Or, ')
         print("`man.add_subruns((0,1,2,3))`")
         print('')
@@ -305,7 +326,7 @@ if __name__ == '__main__':
     man.help()
 
     man.find_latest_run()
-    man.add_all_subrun()
+    man.add_all_subruns()
 
     man.process()
     man.show_rates()
