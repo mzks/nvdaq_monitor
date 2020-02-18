@@ -140,7 +140,7 @@ class manager:
     def show_rates(self):
 
         event_numbers = [len(time) for time in self.timestamps]  ## Event numbers
-        live_time = np.max(np.max(self.timestamps)) - np.min(np.min(self.timestamps))
+        live_time = np.max(np.max(self.timestamps)) - np.min([np.min(time) for time in self.timestamps if time!=[]])
         rates = [event / live_time * 1.e9 if (event and live_time) else 0 for event in event_numbers]
         print('Live time : ', live_time*1.e9, ' sec.')
 
