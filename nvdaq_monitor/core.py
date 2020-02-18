@@ -140,10 +140,8 @@ class manager:
     def show_rates(self):
 
         event_numbers = [len(time) for time in self.timestamps]  ## Event numbers
-        start_time = [(np.min(time) if (time != []) else None) for time in self.timestamps]
-        stop_time = [(np.max(time) if (time != []) else None) for time in self.timestamps]
-        live_time = [stop - start if (stop and start) else None for stop, start in zip(stop_time, start_time)]
-        rates = [event / live * 1.e9 if (event and live) else 0 for event, live in zip(event_numbers, live_time)]
+        live_time = np.max(self.timestamps) - np.min(self.timestamps)
+        rates = [event / live_time * 1.e9 if (event and live_time) else 0 for event in event_numbers]
 
         plt.bar(np.arange(0, self.num_of_channel), rates)
         plt.xlabel('Channel')
