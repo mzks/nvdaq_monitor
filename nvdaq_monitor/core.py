@@ -142,6 +142,7 @@ class manager:
         event_numbers = [len(time) for time in self.timestamps]  ## Event numbers
         live_time = np.max(self.timestamps) - np.min(self.timestamps)
         rates = [event / live_time * 1.e9 if (event and live_time) else 0 for event in event_numbers]
+        print('Live time : ', live_time*1.e9, ' sec.')
 
         plt.bar(np.arange(0, self.num_of_channel), rates)
         plt.xlabel('Channel')
