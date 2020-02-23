@@ -6,6 +6,7 @@ from tqdm import tqdm
 import glob
 import strax
 import blosc
+import lz4.frame
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -78,12 +79,15 @@ class manager:
         self.data_name_list = []
 
 
-    def __load_data(self, data_name):
+    def __load_data(self, data_name, compressor='blosc'):
 
         #print('Target file: ', data_name)
         try:
             self.file = open(data_name, 'rb')
-            self.data = blosc.decompress(self.file.read())
+            if compressor == "blosc":
+                self.data = blosc.decompress(self.file.read())
+            elif compressor == "lz4":
+                self.data = lz4.frame.decompress(self.file.read())
             self.darr = np.frombuffer(self.data, dtype=strax.record_dtype())
         except:
             self.logger.warning('Skipped '+ data_name)
@@ -95,7 +99,7 @@ class manager:
         return sum([len(event) for event in event])
 
 
-    def process(self):
+    def process(self, compressor='blosc'):
 
         # Prepare
         self.init_bin_baseline = 10
@@ -109,7 +113,7 @@ class manager:
 
         # Loop
         for data_name in tqdm(self.data_name_list):
-            if not self.__load_data(data_name): continue
+            if not self.__load_data(data_name, compressor=compressor): continue
             event = []
 
             for record in self.darr:
