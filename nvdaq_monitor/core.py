@@ -54,18 +54,20 @@ class manager:
 
         for i in range(0, 10000):
             subrun_name = str(i).zfill(6)
-            if glob.glob(self.run_dir_name + subrun_name) == []:
-                continue
-            self.add_srun_files(self.run_dir_name + subrun_name + '/')
+            if glob.glob(self.run_dir_name + subrun_name) != []:
+                self.add_srun_files(self.run_dir_name + subrun_name + '/')
+            if glob.glob(self.run_dir_name + subrun_name +'_post') != []:
+                self.add_srun_files(self.run_dir_name + subrun_name + '_post/')
 
 
     def add_subruns(self, subrun_list = (1,2,3)):
 
         for i in subrun_list:
             subrun_name = str(i).zfill(6)
-            if glob.glob(self.run_dir_name + subrun_name) == []:
-                continue
-            self.add_srun_files(self.run_dir_name + subrun_name + '/')
+            if glob.glob(self.run_dir_name + subrun_name) != []:
+                self.add_srun_files(self.run_dir_name + subrun_name + '/')
+            if glob.glob(self.run_dir_name + subrun_name +'_post') != []:
+                self.add_srun_files(self.run_dir_name + subrun_name + '_post/')
 
 
     def add_srun_files(self, subrun_path):
