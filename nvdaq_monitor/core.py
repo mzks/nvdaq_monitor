@@ -38,9 +38,10 @@ class manager:
 
         print('data_dir_name: ', self.data_dir_name)
         list_of_files = np.sort(glob.glob(self.data_dir_name+'*'))
-        for i, file in enumerate(list_of_files):
-            print(i, '\t', os.path.split(file)[1])
-            if i % 5 == 4: print('-----------------------------------------')
+        if run_index_number == None:
+            for i, file in enumerate(list_of_files):
+                print(i, '\t', os.path.split(file)[1])
+                if i % 5 == 4: print('-----------------------------------------')
 
         if run_index_number != None:
             self.run_dir_name = list_of_files[run_index_number] + '/'
