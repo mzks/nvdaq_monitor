@@ -23,6 +23,8 @@ class manager:
         self.data_dir_name = '/Users/mzks/xenon/daq_test/data/redax-data/'
         self.data_name_list = []
 
+        self.figsize_height = 16
+        self.figsize_width = 16
 
     def find_latest_run(self, dir_name=None):
         if dir_name == None:
@@ -104,7 +106,7 @@ class manager:
 
         # Prepare
         self.init_bin_baseline = 10
-        self.num_of_channel = 16
+        self.num_of_channel = 32
 
         self.calced_baselines = [[] for i in range(self.num_of_channel)]
         self.calced_areas = [[] for i in range(self.num_of_channel)]
@@ -177,8 +179,8 @@ class manager:
 
     def show_areas(self, hist_range=None, bins=None):
 
-        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
-        for i in range(4):
+        fig1, axs1 = plt.subplots(8, 4, figsize=(self.figsize_height,self.figsize_width), constrained_layout=True)
+        for i in range(8):
             for j in range(4):
                 channel = i*4 + j
                 axs1[i, j].hist(self.calced_areas[channel], lw=0, label='ch.'+str(channel), range=hist_range, bins=bins)
@@ -212,8 +214,8 @@ class manager:
 
     def show_baselines(self, hist_range=None, bins=None):
 
-        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
-        for i in range(4):
+        fig1, axs1 = plt.subplots(8, 4, figsize=(self.figsize_height,self.figsize_width), constrained_layout=True)
+        for i in range(8):
             for j in range(4):
                 channel = i*4 + j
                 axs1[i, j].hist(self.calced_baselines[channel], lw=0, label='ch.'+str(channel), range=hist_range, bins=bins)
@@ -230,8 +232,8 @@ class manager:
 
     def show_timings(self, hist_range=None, bins=None):
 
-        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
-        for i in range(4):
+        fig1, axs1 = plt.subplots(8, 4, figsize=(self.figsize_height,self.figsize_width), constrained_layout=True)
+        for i in range(8):
             for j in range(4):
                 channel = i*4 + j
                 axs1[i, j].hist(self.peak_timings[channel], lw=0, label='ch.'+str(channel), range=hist_range, bins=bins)
@@ -252,8 +254,8 @@ class manager:
     def show_diff_times(self, hist_range=None, bins=None):
 
         sorted_timestamps = [np.sort(timestamp) for timestamp in self.timestamps]
-        fig1, axs1 = plt.subplots(4, 4, figsize=(16,10), constrained_layout=True)
-        for i in range(4):
+        fig1, axs1 = plt.subplots(8, 4, figsize=(self.figsize_height,self.figsize_width), constrained_layout=True)
+        for i in range(8):
             for j in range(4):
                 channel = i*4 + j
                 axs1[i, j].hist(np.diff(sorted_timestamps[channel]), lw=0, label='ch.'+str(channel), range=hist_range, bins=bins)
@@ -271,8 +273,8 @@ class manager:
 
     def show_timestamps(self):
         sorted_timestamps = [np.sort(timestamp) for timestamp in self.timestamps]
-        fig1, axs1 = plt.subplots(4, 4, figsize=(16, 10), constrained_layout=True)
-        for i in range(4):
+        fig1, axs1 = plt.subplots(8, 4, figsize=(self.figsize_height, self.figsize_width), constrained_layout=True)
+        for i in range(8):
             for j in range(4):
                 channel = i * 4 + j
                 axs1[i, j].plot(sorted_timestamps[channel], label='ch.' + str(channel))
