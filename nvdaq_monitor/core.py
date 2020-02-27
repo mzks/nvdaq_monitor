@@ -23,8 +23,11 @@ class manager:
         self.data_dir_name = '/Users/mzks/xenon/daq_test/data/redax-data/'
         self.data_name_list = []
 
+        self.init_bin_baseline = 10
+
         self.figsize_height = 16
         self.figsize_width = 16
+
 
     def find_latest_run(self, dir_name=None):
         if dir_name == None:
@@ -107,7 +110,6 @@ class manager:
     def process(self, compressor='blosc'):
 
         # Prepare
-        self.init_bin_baseline = 10
         self.num_of_channel = 32
 
         self.calced_baselines = [[] for i in range(self.num_of_channel)]
@@ -321,7 +323,7 @@ class manager:
         print('You can use the following functions:')
         print('show_counts(), show_rates(), show_pulse(), show_area(), show_areas()')
         print('show_baseline(), show_baselines(), show_baselines_bar(), show_baselines_rms_bar(),')
-        print(' show_timing(), show_timings()','show_diff_time(), show_diff_times(), show_timestamp(), show_timestamps()')
+        print('show_timing(), show_timings()','show_diff_time(), show_diff_times(), show_timestamp(), show_timestamps()')
         print('')
 
 
