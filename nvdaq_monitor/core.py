@@ -9,6 +9,9 @@ import blosc
 import lz4.frame
 import matplotlib.pyplot as plt
 import seaborn as sns
+from itertools import groupby
+
+
 
 
 class manager:
@@ -103,6 +106,9 @@ class manager:
     def add_srun_files(self, subrun_path):
 
         file_list = glob.glob(subrun_path + '*')
+        empty_files = [file for file in file_list if os.stat(file).st_size == 0]
+        for empty_file in empty_files:
+            self.logger.warning('Zero size file is ignored:' + empty_file)
         self.data_name_list.extend([file for file in file_list if os.stat(file).st_size != 0])
 
 
@@ -230,6 +236,23 @@ class manager:
                 axs1[i, j].legend()
                 axs1[i, j].set_xlabel('ADC Integration')
                 axs1[i, j].set_ylabel('Counts')
+
+    def show_spes(self, channel=0, adc=20, tot=3, hist_range=None, bins=None):
+
+        spes = []
+        for waveform in self.waveforms[channel]:
+
+            baseline = waveform[0:self.init_bin_baseline].sum() / self.init_bin_baseline
+            inv_waveform = baseline - waveform
+            dst = [sum(1 for e in it) for _, it in groupby(inv_waveform, key=lambda x: x > adc)]
+            event_tot = np.max(dst[1::2]) if (dst[1::2] != []) else 0
+
+            if event_tot > tot:
+                spes.append(inv_waveform.sum())
+
+        plt.hist(spes, lw=0, range=hist_range, bins=bins)
+        plt.xlabel('ADC Integration')
+        plt.ylabel('Counts')
 
 
     def show_baseline(self, channel=0, hist_range=None, bins=None):
@@ -376,9 +399,8 @@ if __name__ == '__main__':
 
     man.help()
 
-    man.find_latest_run()
-    man.add_all_subruns()
+    man.select_run(46)
+    man.select_sub('all')
 
     man.process()
-    man.show_rates()
 
