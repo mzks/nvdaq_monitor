@@ -53,6 +53,33 @@ class manager:
             print('Target: ', self.run_dir_name)
 
 
+    def summarize_subruns(self):
+
+        processing_threads = 8
+        n_normal = 0
+        subruns_list = []
+        n_subruns = []
+        n_subruns_post = []
+        for i in range(0, 10000):
+            subrun_name = str(i).zfill(6)
+            if glob.glob(self.run_dir_name + subrun_name) != []:
+                subruns_list.append(i)
+                file_list = glob.glob(self.run_dir_name + subrun_name + '/*')
+                file_list_post = glob.glob(self.run_dir_name + subrun_name + '_post/*')
+                n_subruns.append(len(file_list))
+                n_subruns_post.append(len(file_list_post))
+        print('Run Dir: ', self.run_dir_name)
+        print(len(subruns_list), 'subruns exist.')
+
+        for i in range(len(subruns_list)):
+            if(n_subruns[i] == processing_threads and n_subruns_post[i] == processing_threads):
+                n_normal += 1
+            else:
+                print('Subrun'+ str(i) + ' has ' + str(n_subruns[i]) +' and '+str(n_subruns_post[i]) +' files in dir and dir_post.')
+
+        print(str(n_normal) +' files are collect.')
+
+
     def add_all_subruns(self):
 
         for i in range(0, 10000):
@@ -86,6 +113,18 @@ class manager:
     def clear_all_subruns(self):
         self.data_name_list = []
 
+
+    def select_sub(self, list=[]):
+        if list == 'all':
+            self.add_all_subruns()
+            return
+
+        if list != []:
+            self.add_subruns(list)
+        else:
+            self.summarize_subruns()
+
+        return
 
     def __load_data(self, data_name, compressor='blosc'):
 
