@@ -348,9 +348,11 @@ class manager:
         print('')
 
         print('Step 2: Merge subrun files')
-        print("`man.add_all_subruns()`")
+        print("`select_sub()")
+        print('Then,')
+        print("`select_sub('all')")
         print('Or, ')
-        print("`man.add_subruns((0,1,2,3))`")
+        print("`select_sub([0,1,2,3,4])")
         print('')
 
         print('Step 3: Check and process')

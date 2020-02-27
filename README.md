@@ -8,4 +8,10 @@ make
 ```
 
 ### Usage
-See notebook/usage.ipynb
+```
+import nvdaq_monitor
+man = nvdaq_monoitor.manager()
+man.help()
+```
+
+See `notebook/usage.ipynb` in detail
