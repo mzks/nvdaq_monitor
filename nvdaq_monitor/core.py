@@ -77,6 +77,9 @@ class manager:
         for i in range(len(subruns_list)):
             if(n_subruns[i] == processing_threads and n_subruns_post[i] == processing_threads):
                 n_normal += 1
+            elif (i == len(subruns_list)-1 and n_subruns[i] == processing_threads and n_subruns_post[i]==0):
+                n_normal += 1
+                print('No post dir in the final subrun (normal behavior)')
             else:
                 print('Subrun'+ str(i) + ' has ' + str(n_subruns[i]) +' and '+str(n_subruns_post[i]) +' files in dir and dir_post.')
 
