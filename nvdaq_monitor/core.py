@@ -125,6 +125,7 @@ class manager:
 
     def select_sub(self, list=[]):
         if list == 'all':
+            self.summarize_subruns()
             self.add_all_subruns()
             return
 
