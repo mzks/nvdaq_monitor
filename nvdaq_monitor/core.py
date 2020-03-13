@@ -165,6 +165,7 @@ class manager:
         self.calced_areas = [[] for i in range(self.num_of_channel)]
         self.timestamps= [[] for i in range(self.num_of_channel)]
         self.peak_timings = [[] for i in range(self.num_of_channel)]
+        self.peak_heights = [[] for i in range(self.num_of_channel)]
         self.waveforms= [[] for i in range(self.num_of_channel)]
 
         # Loop
@@ -191,6 +192,7 @@ class manager:
                     self.calced_baselines[record['channel']].append(calced_baseline)
                     self.calced_areas[record['channel']].append(calced_area)
                     self.peak_timings[record['channel']].append(np.argmin(merged_event))
+                    self.peak_heights[record['channel']].append(calced_baseline-np.min(merged_event))
 
                     event = []
 
@@ -309,6 +311,24 @@ class manager:
                 axs1[i, j].hist(self.peak_timings[channel], lw=0, label='ch.'+str(channel), range=hist_range, bins=bins)
                 axs1[i, j].legend()
                 axs1[i, j].set_xlabel('Peak timing (index)')
+                axs1[i, j].set_ylabel('Counts')
+
+
+    def show_height(self, channel=0, hist_range=None, bins=None):
+        plt.hist(self.peak_heights[channel], lw=0, range=hist_range, bins=bins)
+        plt.xlabel('Peak height (ADC)')
+        plt.ylabel('Counts')
+
+
+    def show_heights(self, hist_range=None, bins=None):
+
+        fig1, axs1 = plt.subplots(8, 4, figsize=(self.figsize_height,self.figsize_width), constrained_layout=True)
+        for i in range(8):
+            for j in range(4):
+                channel = i*4 + j
+                axs1[i, j].hist(self.peak_heights[channel], lw=0, label='ch.'+str(channel), range=hist_range, bins=bins)
+                axs1[i, j].legend()
+                axs1[i, j].set_xlabel('Peak height (ADC)')
                 axs1[i, j].set_ylabel('Counts')
 
 
