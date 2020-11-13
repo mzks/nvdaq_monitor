@@ -138,14 +138,24 @@ class manager:
 
     def __load_data(self, data_name, compressor='blosc'):
 
-        #print('Target file: ', data_name)
+        raw_record_dtype = [(('Channel/PMT number', 'channel'), np.int16),
+        (('Time resolution in ns', 'dt'), np.int16),
+        (('Start time of the interval (ns since unix epoch)', 'time'), np.int64),
+        (('Length of the interval in samples', 'length'),np.int32),
+        (('Integral in ADC x samples', 'area'), np.int32),
+        (('Length of pulse to which the record belongs (without zero-padding)', 'pulse_length'), np.int32),
+        (('Fragment number in the pulse', 'record_i'), np.int16),
+        (('Baseline in ADC counts. data = int(baseline) - data_orig', 'baseline'), np.float32),
+        (('Level of data reduction applied (strax.ReductionLevel enum)', 'reduction_level'), np.uint8),
+        (('Waveform data in ADC counts above baseline', 'data'), np.int16, 110)]
+                #print('Target file: ', data_name)
         try:
             self.file = open(data_name, 'rb')
             if compressor == "blosc":
                 self.data = blosc.decompress(self.file.read())
             elif compressor == "lz4":
                 self.data = lz4.frame.decompress(self.file.read())
-            self.darr = np.frombuffer(self.data, dtype=strax.record_dtype())
+            self.darr = np.frombuffer(self.data,dtype=raw_record_dtype)
         except:
             self.logger.warning('Skipped '+ data_name)
             return False
